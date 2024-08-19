@@ -66,7 +66,7 @@ def generate_launch_description():
         livox_driver,
         transform_lidar,
         transform_imu,
-        # livox_rviz,
+        livox_rviz,
         # launch.actions.RegisterEventHandler(
         #     event_handler=launch.event_handlers.OnProcessExit(
         #         target_action=livox_rviz,
