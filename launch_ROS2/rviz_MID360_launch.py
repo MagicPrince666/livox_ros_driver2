@@ -40,6 +40,20 @@ def generate_launch_description():
         output='screen',
         parameters=livox_ros2_params
         )
+    
+    transform_lidar = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        name='velodyne_to_base_link',
+        arguments=['0', '0', '0', '0', '0', '0','base_link','livox_frame'],
+    )
+
+    transform_imu = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        name='base_link_to_imu',
+        arguments=['0', '0', '0.02','0', '0', '0', '1','base_link','livox_frame'],
+    )
 
     livox_rviz = Node(
             package='rviz2',
@@ -50,7 +64,9 @@ def generate_launch_description():
 
     return LaunchDescription([
         livox_driver,
-        livox_rviz,
+        transform_lidar,
+        transform_imu,
+        # livox_rviz,
         # launch.actions.RegisterEventHandler(
         #     event_handler=launch.event_handlers.OnProcessExit(
         #         target_action=livox_rviz,

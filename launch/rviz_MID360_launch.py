@@ -3,6 +3,7 @@ from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch_ros.actions import Node
 import launch
+from launch.substitutions import LaunchConfiguration
 
 ################### user configure parameters for ros2 start ###################
 xfer_format   = 0    # 0-Pointcloud2(PointXYZRTL), 1-customized pointcloud format
@@ -13,8 +14,9 @@ output_type   = 0
 frame_id      = 'livox_frame'
 lvx_file_path = '/home/livox/livox_test.lvx'
 cmdline_bd_code = 'livox0000000001'
-rviz_config_path = os.path.join(get_package_share_directory('chassis'), 'config', 'display_point_cloud_ROS2.rviz')
-user_config_path = os.path.join(get_package_share_directory('chassis'), 'config', 'MID360_config.json')
+
+rviz_config_path = os.path.join(get_package_share_directory('livox_ros_driver2'), 'config', 'display_point_cloud_ROS2.rviz')
+user_config_path = os.path.join(get_package_share_directory('livox_ros_driver2'), 'config', 'MID360_config.json')
 ################### user configure parameters for ros2 end #####################
 
 livox_ros2_params = [
@@ -38,6 +40,20 @@ def generate_launch_description():
         output='screen',
         parameters=livox_ros2_params
         )
+    
+    transform_lidar = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        name='velodyne_to_base_link',
+        arguments=['0', '0', '0', '0', '0', '0','base_link','livox_frame'],
+    )
+
+    transform_imu = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        name='base_link_to_imu',
+        arguments=['0', '0', '0.02','0', '0', '0', '1','base_link','livox_frame'],
+    )
 
     livox_rviz = Node(
             package='rviz2',
@@ -48,7 +64,9 @@ def generate_launch_description():
 
     return LaunchDescription([
         livox_driver,
-        livox_rviz,
+        transform_lidar,
+        transform_imu,
+        # livox_rviz,
         # launch.actions.RegisterEventHandler(
         #     event_handler=launch.event_handlers.OnProcessExit(
         #         target_action=livox_rviz,
